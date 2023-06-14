@@ -33,7 +33,7 @@ public class WebServer {
      }
 
      new BuildInfoCollector().register();
-     new JmxCollector(new File(args[1]), JmxCollector.Mode.STANDALONE).register();
+     new JmxCollector(new File(args[1]), JmxCollector.Mode.STANDALONE, socket.getPort()).register();
      new HTTPServer(socket, CollectorRegistry.defaultRegistry);
 
      System.out.println(

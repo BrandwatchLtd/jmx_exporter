@@ -3,10 +3,13 @@ package io.prometheus.jmx;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.HTTPServer;
 import io.prometheus.client.hotspot.DefaultExports;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
+import java.io.FileReader;
 import java.lang.instrument.Instrumentation;
 import java.net.InetSocketAddress;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,7 +29,7 @@ public class JavaAgent {
             Config config = parseConfig(agentArgument, host);
 
             new BuildInfoCollector().register();
-            new JmxCollector(new File(config.file), JmxCollector.Mode.AGENT).register();
+            new JmxCollector(new File(config.file), JmxCollector.Mode.AGENT, config.port).register();
             DefaultExports.initialize();
             server = new HTTPServer(config.socket, CollectorRegistry.defaultRegistry, true);
         }

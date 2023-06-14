@@ -171,6 +171,13 @@ public class JmxCollectorTest {
     }
 
     @Test
+    public void testBaseUrl() throws Exception {
+        JmxCollector jc = new JmxCollector(
+                "\n---\nbaseUrl: `1.2.3.4`\nrules:\n- pattern: `.*`\n  name: foo\n".replace('`','"')).register(registry);
+        assertNotNull(registry.getSampleValue("foo", new String[]{"base_url"}, new String[]{"1.2.3.4:"}));
+    }
+
+    @Test
     public void testWhitelist() throws Exception {
       JmxCollector jc = new JmxCollector("\n---\nwhitelistObjectNames:\n- java.lang:*\n- java.lang:*\n- org.apache.cassandra.concurrent:*".replace('`','"')).register(registry);
 

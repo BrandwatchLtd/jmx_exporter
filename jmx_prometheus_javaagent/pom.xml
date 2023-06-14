@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.prometheus.jmx</groupId>
         <artifactId>parent</artifactId>
-        <version>0.18.1-SNAPSHOT</version>
+        <version>0.18.1</version>
     </parent>
 
     <artifactId>jmx_prometheus_javaagent</artifactId>
@@ -90,6 +90,34 @@
                             <dependencySourceIncludes>
                                 <dependencySourceInclude>${project.groupId}:*</dependencySourceInclude>
                             </dependencySourceIncludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>jdeb</artifactId>
+                <groupId>org.vafer</groupId>
+                <version>1.0</version>
+
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jdeb</goal>
+                        </goals>
+                        <configuration>
+                            <deb>${project.build.directory}/${project.artifactId}-${project.version}.deb</deb>
+                            <dataSet>
+                                <data>
+                                    <src>${project.build.directory}/${project.build.finalName}.jar</src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/opt/jmx_prometheus_javaagent</prefix>
+                                    </mapper>
+                                </data>
+                            </dataSet>
                         </configuration>
                     </execution>
                 </executions>

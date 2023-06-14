@@ -1,0 +1,9 @@
+Package: [[artifactId]]
+Version: [[version]]-bw
+Section: misc
+Priority: optional
+Architecture: all
+Depends: java-runtime
+Maintainer: Richard Goodman <richardg@brandwatch.com>
+Description: BW specific jmx exporter
+Distribution: development

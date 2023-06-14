@@ -66,6 +66,8 @@ public class JmxCollector extends Collector implements Collector.Describable {
       String jmxUrl = "";
       String username = "";
       String password = "";
+      String baseUrl = "";
+      String port = "";
       boolean ssl = false;
       boolean lowercaseOutputName;
       boolean lowercaseOutputLabelNames;
@@ -84,13 +86,15 @@ public class JmxCollector extends Collector implements Collector.Describable {
     private final JmxMBeanPropertyCache jmxMBeanPropertyCache = new JmxMBeanPropertyCache();
 
     public JmxCollector(File in) throws IOException, MalformedObjectNameException {
-        this(in, null);
+        this(in, null, 0);
     }
 
-    public JmxCollector(File in, Mode mode) throws IOException, MalformedObjectNameException {
+    public JmxCollector(File in, Mode mode, int port) throws IOException, MalformedObjectNameException {
         configFile = in;
         this.mode = mode;
-        config = loadConfig((Map<String, Object>)new Yaml().load(new FileReader(in)));
+        Map<String, Object> yamlConfig = new Yaml().load(new FileReader(in));
+        yamlConfig.put("port", String.valueOf(port));
+        config = loadConfig(yamlConfig);
         config.lastUpdate = configFile.lastModified();
         exitOnConfigError();
     }
@@ -164,6 +168,13 @@ public class JmxCollector extends Collector implements Collector.Describable {
             throw new IllegalArgumentException("Invalid number provided for startDelaySeconds", e);
           }
         }
+
+        if (yamlConfig.containsKey("port")) {
+            String port = (String)yamlConfig.get("port");
+            // Convert the jmx ports to the original HBase port mappings
+            cfg.port = cfg.port.replaceAll("^7", "60");
+        }
+
         if (yamlConfig.containsKey("hostPort")) {
           if (yamlConfig.containsKey("jmxUrl")) {
             throw new IllegalArgumentException("At most one of hostPort and jmxUrl must be provided");
@@ -171,6 +182,10 @@ public class JmxCollector extends Collector implements Collector.Describable {
           cfg.jmxUrl ="service:jmx:rmi:///jndi/rmi://" + (String)yamlConfig.get("hostPort") + "/jmxrmi";
         } else if (yamlConfig.containsKey("jmxUrl")) {
           cfg.jmxUrl = (String)yamlConfig.get("jmxUrl");
+        }
+
+        if (yamlConfig.containsKey("baseUrl")) {
+          cfg.baseUrl = (String)yamlConfig.get("baseUrl");
         }
 
         if (yamlConfig.containsKey("username")) {
@@ -567,6 +582,11 @@ public class JmxCollector extends Collector implements Collector.Describable {
           // Set the labels.
           ArrayList<String> labelNames = new ArrayList<String>();
           ArrayList<String> labelValues = new ArrayList<String>();
+          if (!config.baseUrl.isEmpty()) {
+              String finalBaseUrl = config.baseUrl + ":" + config.port;
+              labelNames.add("base_url");
+              labelValues.add(finalBaseUrl);
+          }
           if (rule.labelNames != null) {
             for (int i = 0; i < rule.labelNames.size(); i++) {
               final String unsafeLabelName = rule.labelNames.get(i);
