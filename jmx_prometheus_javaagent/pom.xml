@@ -5,10 +5,10 @@
     <parent>
         <groupId>io.prometheus.jmx</groupId>
         <artifactId>parent</artifactId>
-        <version>0.18.1</version>
+        <version>0.18.2</version>
     </parent>
 
-    <artifactId>jmx_prometheus_javaagent</artifactId>
+    <artifactId>jmx-prometheus-javaagent</artifactId>
     <name>Prometheus JMX Exporter - Java Agent</name>
     <description>
         See https://github.com/prometheus/jmx_exporter/blob/master/README.md
@@ -111,10 +111,11 @@
                             <dataSet>
                                 <data>
                                     <src>${project.build.directory}/${project.build.finalName}.jar</src>
+                                    <dst>${project.build.finalName}.jar</dst>
                                     <type>file</type>
                                     <mapper>
                                         <type>perm</type>
-                                        <prefix>/opt/jmx_prometheus_javaagent</prefix>
+                                        <prefix>/opt</prefix>
                                     </mapper>
                                 </data>
                             </dataSet>

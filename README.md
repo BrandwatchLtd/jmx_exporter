@@ -1,6 +1,47 @@
 JMX Exporter
 =====
 
+## BW specific things
+
+Currently this is only used for HBase, where we only use the java agent in order to achieve this. Some slight tweaks have been added to this repo to achieve our goals, most notably, the base URL being added as a label, and with this, some simple port replacement is executed. For example:
+
+Region servers typically run on ports 60200-X , but the agents themselves run on ports 7200-X, so when applying the service url:port as a label, we simply do a '7200'.replace('7', '60').
+
+You need to have java11 to compile this repo (we ignore the java6 components of this repo). To compile, simply run the following:
+```
+./mvnw package -pl collector,jmx_prometheus_javaagent_common,jmx_prometheus_javaagent
+```
+We then use the jar that can be found under `jmx_prometheus_javaagent/target/jmx-prometheus-javaagent-<version>.jar`.
+
+If you need to add logging for debugging, you can do the following:
+
+1. On the box you are testing, add the following into a file called `logging.properties`
+```
+handlers=java.util.logging.ConsoleHandler
+java.util.logging.ConsoleHandler.level=ALL
+io.prometheus.jmx.level=ALL
+io.prometheus.jmx.shaded.io.prometheus.jmx.level=ALL
+```
+
+2. Edit the `/etc/hadoop/conf/hbase-env.sh` to isolate the instance to add the following flag
+```
+...
+# In this example, im specifically targeting the agent that would run for regionserver_0
+if [ $PORT = 7200 ]; then
+    export HBASE_OPTS="${HBASE_OPTS}"' -Djava.util.logging.config.file=/etc/jmx-prometheus//logging.properties -javaagent:/opt/jmx-prometheus-javaagent-0.18.1.jar='"${PORT}"':/etc/jmx-prometheus/hbase-jmx-exporter.yaml'
+  else
+    export HBASE_OPTS="${HBASE_OPTS}"' -javaagent:/opt/jmx-prometheus-javaagent-0.18.1.jar='"${PORT}"':/etc/jmx-prometheus/hbase-jmx-exporter.yaml'
+  fi
+...
+```
+
+3. Restart the instance, logs should appear under
+```
+less /data/disk0/logs/hbase/hbase-hbase_<cluster_name>_regionserver_0-regionserver-<hostname>.out
+```
+
+=====
+
 JMX to Prometheus exporter: a collector that can configurably scrape and
 expose mBeans of a JMX target.
 

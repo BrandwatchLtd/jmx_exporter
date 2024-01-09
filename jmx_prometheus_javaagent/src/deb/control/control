@@ -1,5 +1,5 @@
 Package: [[artifactId]]
-Version: [[version]]-bw
+Version: [[version]]
 Section: misc
 Priority: optional
 Architecture: all

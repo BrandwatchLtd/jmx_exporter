@@ -172,7 +172,7 @@ public class JmxCollector extends Collector implements Collector.Describable {
         if (yamlConfig.containsKey("port")) {
             String port = (String)yamlConfig.get("port");
             // Convert the jmx ports to the original HBase port mappings
-            cfg.port = cfg.port.replaceAll("^7", "60");
+            cfg.port = port.replaceAll("^7", "60");
         }
 
         if (yamlConfig.containsKey("hostPort")) {
